@@ -88,6 +88,10 @@ td{font-size:13px}tbody tr:last-child td{border-bottom:0}
 .inline-actions{display:flex;gap:6px}.mini-btn{border:0;background:#f2f2f7;border-radius:8px;padding:7px 9px;font-size:11px;font-weight:700;color:var(--text)}.mini-btn.blue{color:var(--blue);background:rgba(0,113,227,.08)}.mini-btn.red{color:var(--red);background:rgba(217,45,32,.06)}
 .setting-line{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}.setting-line:last-child{border-bottom:0}.setting-line strong{display:block}.setting-line span{font-size:12px;color:var(--muted)}
 .cash-input{max-width:180px;text-align:right}
+.backup-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.backup-status{font-size:12px;color:var(--muted);margin-top:4px;max-width:460px;line-height:1.5}
+.backup-status.ok{color:var(--green)}.backup-status.warn{color:var(--orange)}.backup-status.bad{color:var(--red)}
+.auto-check{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:650;white-space:nowrap}.auto-check input{width:18px;height:18px;accent-color:var(--blue)}
 .analytics-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .range-switch{display:flex;gap:4px;padding:4px;background:rgba(118,118,128,.12);border-radius:11px}
 .range-switch button{height:32px;border:0;background:transparent;color:var(--muted);padding:0 11px;border-radius:8px;font-size:12px;font-weight:700}
@@ -135,10 +139,57 @@ td{font-size:13px}tbody tr:last-child td{border-bottom:0}
 .active-tx-list{display:grid;gap:0}.active-tx-row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}.active-tx-row:last-child{border-bottom:0}.active-tx-row .when{font-size:11px;color:var(--muted)}.active-tx-row .what{font-size:13px;font-weight:650}.active-tx-row .kind{font-size:11px;color:var(--muted);margin-top:2px}.active-tx-row .amt{font-size:13px;font-weight:750;white-space:nowrap}
 @media(max-width:1050px){.kpis{grid-template-columns:1fr 1fr}.four-grid{grid-template-columns:1fr 1fr}.dashboard-grid{grid-template-columns:1fr}.analytics-kpis{grid-template-columns:repeat(2,1fr)}.topbar{flex-wrap:wrap}.nav{order:3;width:100%;overflow:auto}.nav button{flex:1;white-space:nowrap}}
 @media(max-width:650px){.app{padding:18px 14px 48px}.topbar{margin-bottom:18px}.brand p{display:none}.actions .btn:not(.primary){display:none}.hero{align-items:flex-start;flex-direction:column}.hero h2{font-size:29px}.kpis,.four-grid,.analytics-kpis{grid-template-columns:1fr}.kpi{min-height:120px}.section-tools{align-items:flex-start;flex-direction:column}.toolrow{width:100%}.search{min-width:0;flex:1}.form-grid{grid-template-columns:1fr}.installment-row{grid-template-columns:1fr 1fr}.installment-row .wide{grid-column:1/-1}.modal{padding:18px;border-radius:20px}.event{grid-template-columns:42px 1fr}.event .amount{grid-column:2}.month-detail-grid{grid-template-columns:1fr}.analytics-chart-card{padding:17px}.chart-head{align-items:flex-start;flex-direction:column}.month-chart{grid-template-columns:repeat(var(--chart-cols,12),64px);margin-right:-4px}.active-tx-row{grid-template-columns:70px 1fr}.active-tx-row .amt{grid-column:2}}
+
+/* App lock */
+body.locked{overflow:hidden}
+body.locked .app{filter:blur(14px);transform:scale(.995);pointer-events:none;user-select:none}
+.lock-screen{
+  position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+  padding:22px;background:rgba(245,245,247,.78);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px)
+}
+.lock-screen[hidden]{display:none}
+.lock-card{
+  width:min(420px,100%);background:rgba(255,255,255,.94);border:1px solid rgba(0,0,0,.07);
+  border-radius:28px;padding:30px;box-shadow:0 28px 90px rgba(0,0,0,.13);text-align:center
+}
+.lock-mark{
+  width:62px;height:62px;border-radius:19px;margin:0 auto 18px;display:grid;place-items:center;
+  background:#111;color:#fff;font-size:26px;font-weight:800;letter-spacing:-1px
+}
+.lock-card h2{margin:0;font-size:27px;letter-spacing:-.8px}
+.lock-card .lock-sub{margin:8px auto 22px;color:var(--muted);font-size:13px;max-width:310px;line-height:1.55}
+.lock-field{text-align:left}
+.lock-field label{display:block;font-size:12px;font-weight:700;margin:0 0 7px;color:#3a3a3c}
+.lock-field input{
+  width:100%;height:50px;border:1px solid rgba(0,0,0,.11);border-radius:14px;background:#fff;
+  padding:0 14px;font-size:18px;letter-spacing:.16em;text-align:center;color:var(--text)
+}
+.lock-submit{width:100%;height:48px;margin-top:12px;border:0;border-radius:14px;background:var(--blue);color:#fff;font-weight:750}
+.lock-submit:hover{background:#0077ed}
+.lock-error{min-height:20px;margin:9px 0 0;color:var(--red);font-size:12px;font-weight:650}
+.lock-note{margin:14px 0 0;color:#8e8e93;font-size:11px;line-height:1.5}
+@media(max-width:650px){.lock-card{padding:25px 20px;border-radius:24px}.lock-card h2{font-size:24px}}
+
 </style>
 </head>
-<body>
-<div class="app">
+<body class="locked">
+<div class="lock-screen" id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <div class="lock-mark">B</div>
+    <h2 id="lockTitle">Balance đã khóa</h2>
+    <p class="lock-sub">Nhập mật khẩu để mở dữ liệu tài chính của bạn.</p>
+    <div class="lock-field">
+      <label for="lockPassword">Mật khẩu</label>
+      <input id="lockPassword" type="password" inputmode="numeric" pattern="[0-9]*"
+             maxlength="6" autocomplete="current-password" placeholder="••••••" required>
+    </div>
+    <button class="lock-submit" type="submit">Mở khóa</button>
+    <p class="lock-error" id="lockError" aria-live="polite"></p>
+    <p class="lock-note">Ứng dụng sẽ tự khóa lại sau 10 phút kể từ lúc mở khóa.</p>
+  </form>
+</div>
+
+<div class="app" id="balanceApp" aria-hidden="true">
   <header class="topbar">
     <div class="brand">
       <div class="logo">B</div>
@@ -353,6 +404,18 @@ td{font-size:13px}tbody tr:last-child td{border-bottom:0}
   <div class="modal">
     <div class="modal-head"><h3>Thiết lập</h3><button class="close" data-close="settingsModal">×</button></div>
     <div class="setting-line"><div><strong>Số dư tiền thực tế ban đầu</strong><span>Làm mốc để tính tiền đang có.</span></div><input id="openingBalance" class="cash-input" inputmode="numeric"></div>
+    <div class="setting-line">
+      <div>
+        <strong>Sao lưu Excel tự động theo tháng</strong>
+        <div class="backup-status" id="backupFolderStatus">Chưa chọn thư mục. Đích mong muốn: /Users/mac/Documents/DAT/BALANCE APP</div>
+      </div>
+      <div class="backup-actions">
+        <label class="auto-check"><input type="checkbox" id="autoBackupEnabled" checked> Tự động</label>
+        <button type="button" class="btn" id="chooseBackupFolderBtn">Chọn thư mục</button>
+        <button type="button" class="btn soft" id="backupSelectedMonthBtn">Lưu tháng đang chọn</button>
+        <button type="button" class="btn" id="backupAllMonthsBtn">Lưu tất cả tháng</button>
+      </div>
+    </div>
     <div class="setting-line"><div><strong>Sao lưu dữ liệu</strong><span>Tải toàn bộ dữ liệu thành file JSON.</span></div><button class="btn" id="exportJsonBtn">Xuất JSON</button></div>
     <div class="setting-line"><div><strong>Nhập dữ liệu</strong><span>Khôi phục từ file JSON đã sao lưu.</span></div><input type="file" id="importJsonInput" accept=".json" style="max-width:230px"></div>
     <div class="setting-line"><div><strong>Xóa toàn bộ dữ liệu</strong><span>Không thể hoàn tác nếu chưa sao lưu.</span></div><button class="btn danger" id="resetDataBtn">Xóa dữ liệu</button></div>
@@ -370,11 +433,90 @@ td{font-size:13px}tbody tr:last-child td{border-bottom:0}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 (()=>{
 const KEY="balance-v2-data";
+const BACKUP_SETTINGS_KEY="balance-v2-excel-backup-settings";
+const BACKUP_DB_NAME="balance-v2-folder-db";
+const BACKUP_STORE="handles";
+const BACKUP_HANDLE_KEY="monthly-excel-folder";
+let backupDirHandle=null;
+let backupTimer=null;
+let backupBusy=false;
+let backupQueued=false;
+let backupSettings=loadBackupSettings();
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})}
 const $=id=>document.getElementById(id);
+
+const LOCK_PASSWORD_HASH="b141cd2efc6ab14b1dc0b5e2fbf689aa9d5a133e83b5fe476ce69032b40c14f3";
+const LOCK_DURATION_MS=10*60*1000;
+let appLockTimer=null;
+let appUnlockDeadline=0;
+
+async function sha256Hex(value){
+  const bytes=new TextEncoder().encode(value);
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function lockApp(message=""){
+  clearTimeout(appLockTimer);
+  appLockTimer=null;
+  appUnlockDeadline=0;
+  document.body.classList.add("locked");
+  const screen=$("lockScreen"),app=$("balanceApp"),input=$("lockPassword"),error=$("lockError");
+  screen.hidden=false;
+  app.setAttribute("aria-hidden","true");
+  if("inert" in app) app.inert=true;
+  input.value="";
+  error.textContent=message;
+  requestAnimationFrame(()=>input.focus());
+}
+function scheduleAppLock(){
+  clearTimeout(appLockTimer);
+  appUnlockDeadline=Date.now()+LOCK_DURATION_MS;
+  appLockTimer=setTimeout(()=>lockApp("Đã tự khóa sau 10 phút."),LOCK_DURATION_MS);
+}
+function unlockApp(){
+  document.body.classList.remove("locked");
+  const screen=$("lockScreen"),app=$("balanceApp"),error=$("lockError");
+  screen.hidden=true;
+  error.textContent="";
+  app.setAttribute("aria-hidden","false");
+  if("inert" in app) app.inert=false;
+  scheduleAppLock();
+}
+$("lockForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const input=$("lockPassword"),error=$("lockError");
+  const value=input.value.trim();
+  error.textContent="";
+  if(!/^\d{6}$/.test(value)){
+    error.textContent="Mật khẩu gồm 6 chữ số.";
+    input.focus();input.select();return;
+  }
+  try{
+    const hash=await sha256Hex(value);
+    if(hash===LOCK_PASSWORD_HASH){
+      unlockApp();
+    }else{
+      error.textContent="Mật khẩu không đúng.";
+      input.value="";input.focus();
+    }
+  }catch(err){
+    error.textContent="Trình duyệt không hỗ trợ xác thực bảo mật này.";
+  }
+});
+function checkAppLockDeadline(){
+  if(!document.body.classList.contains("locked") && appUnlockDeadline && Date.now()>=appUnlockDeadline){
+    lockApp("Đã tự khóa sau 10 phút.");
+  }
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkAppLockDeadline()});
+window.addEventListener("focus",checkAppLockDeadline);
+$("balanceApp").inert=true;
+requestAnimationFrame(()=>$("lockPassword").focus());
+
 const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
 const money=n=>new Intl.NumberFormat("vi-VN",{style:"currency",currency:"VND",maximumFractionDigits:0}).format(Number(n)||0);
@@ -391,6 +533,169 @@ let editingDebtId=null;
 let analyticsRange=12;
 let analyticsSelectedMonth=today().slice(0,7);
 
+
+function loadBackupSettings(){
+  try{
+    const v=JSON.parse(localStorage.getItem(BACKUP_SETTINGS_KEY)||"null");
+    return {autoEnabled:v?.autoEnabled!==false,lastArchivedMonth:v?.lastArchivedMonth||"",lastSavedAt:v?.lastSavedAt||""};
+  }catch(e){return {autoEnabled:true,lastArchivedMonth:"",lastSavedAt:""}}
+}
+function persistBackupSettings(){localStorage.setItem(BACKUP_SETTINGS_KEY,JSON.stringify(backupSettings))}
+function openBackupDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(BACKUP_DB_NAME,1);
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(BACKUP_STORE))req.result.createObjectStore(BACKUP_STORE)};
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+}
+async function idbSetHandle(handle){
+  const db=await openBackupDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction(BACKUP_STORE,"readwrite");tx.objectStore(BACKUP_STORE).put(handle,BACKUP_HANDLE_KEY);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}});
+}
+async function idbGetHandle(){
+  const db=await openBackupDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction(BACKUP_STORE,"readonly");const req=tx.objectStore(BACKUP_STORE).get(BACKUP_HANDLE_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);tx.oncomplete=()=>db.close()});
+}
+async function ensureBackupPermission(handle,request=false){
+  if(!handle)return false;
+  const opts={mode:"readwrite"};
+  try{
+    if((await handle.queryPermission(opts))==="granted")return true;
+    if(request && (await handle.requestPermission(opts))==="granted")return true;
+  }catch(e){}
+  return false;
+}
+function backupMonthLabel(month){const [y,m]=month.split("-");return `Tháng ${m}/${y}`}
+function backupFileName(month){const [y,m]=month.split("-");return `Balance_${m}-${y}.xlsx`}
+function monthShift(month,delta){const [y,m]=month.split("-").map(Number),d=new Date(y,m-1+delta,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
+function signedTxAmount(t){return t.type.includes("income")?Number(t.amount)||0:-(Number(t.amount)||0)}
+function cashAtMonthEnd(month){return data.openingBalance+data.transactions.filter(t=>String(t.date||"")<=`${month}-99`).reduce((s,t)=>s+signedTxAmount(t),0)}
+function hasMonthData(month){
+  if(data.transactions.some(t=>monthOf(t.date)===month))return true;
+  if(data.contracts.some(c=>(c.installments||[]).some(i=>monthOf(i.date)===month||monthOf(i.paidDate)===month)))return true;
+  if(data.debts.some(d=>(d.payments||[]).some(p=>monthOf(p.date)===month)||monthOf(d.nextDate)===month))return true;
+  return month===today().slice(0,7);
+}
+function allBackupMonths(){
+  const set=new Set([today().slice(0,7)]);
+  data.transactions.forEach(t=>{if(monthOf(t.date))set.add(monthOf(t.date))});
+  data.contracts.forEach(c=>(c.installments||[]).forEach(i=>{if(monthOf(i.date))set.add(monthOf(i.date));if(monthOf(i.paidDate))set.add(monthOf(i.paidDate))}));
+  data.debts.forEach(d=>{(d.payments||[]).forEach(p=>{if(monthOf(p.date))set.add(monthOf(p.date))});if(monthOf(d.nextDate))set.add(monthOf(d.nextDate))});
+  return [...set].filter(Boolean).sort();
+}
+function makeMonthlyWorkbook(month){
+  if(!window.XLSX)throw new Error("Không tải được thư viện Excel. Hãy kiểm tra kết nối internet.");
+  const tx=data.transactions.filter(t=>monthOf(t.date)===month).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const sumType=type=>tx.filter(t=>t.type===type).reduce((s,t)=>s+(Number(t.amount)||0),0);
+  const ai=sumType("active_income"),pi=sumType("passive_income"),ae=sumType("active_expense"),pe=sumType("passive_expense");
+  const totalIn=ai+pi,totalOut=ae+pe,net=totalIn-totalOut;
+  const pendingExpected=data.contracts.reduce((s,c)=>s+(c.installments||[]).filter(i=>!i.paid&&monthOf(i.date)===month).reduce((x,i)=>x+(Number(i.amount)||0),0),0);
+  const debtPaid=data.debts.reduce((s,d)=>s+(d.payments||[]).filter(p=>monthOf(p.date)===month).reduce((x,p)=>x+(Number(p.amount)||0),0),0);
+  const overview=[
+    ["BALANCE — BÁO CÁO THÁNG",backupMonthLabel(month)],
+    ["Xuất lúc",new Date().toLocaleString("vi-VN")],
+    [],
+    ["Thu nhập chủ động",ai],["Thu nhập thụ động",pi],["Tổng thu",totalIn],
+    ["Chi tiêu chủ động",ae],["Chi tiêu thụ động",pe],["Tổng chi",totalOut],
+    ["Ròng tháng",net],["Số tiền thực tế cuối tháng",cashAtMonthEnd(month)],
+    ["Thu thụ động dự kiến chưa nhận trong tháng",pendingExpected],["Nợ / trả góp đã trả trong tháng",debtPaid]
+  ];
+  const wsOverview=XLSX.utils.aoa_to_sheet(overview);wsOverview["!cols"]=[{wch:42},{wch:24}];
+
+  const txRows=tx.map(t=>({"Ngày":t.date||"","Nhóm":typeLabel(t.type),"Nội dung":t.note||"","Nguồn":t.source||"Thủ công","Số tiền":signedTxAmount(t)}));
+  const wsTx=XLSX.utils.json_to_sheet(txRows.length?txRows:[{"Ngày":"","Nhóm":"Chưa có giao dịch","Nội dung":"","Nguồn":"","Số tiền":0}]);
+  wsTx["!cols"]=[{wch:13},{wch:24},{wch:42},{wch:20},{wch:18}];
+
+  const contractRows=[];
+  data.contracts.forEach(c=>{
+    const paid=contractPaid(c),remain=contractPending(c),pct=c.value?Math.round(paid/c.value*100):0;
+    const relevant=(c.installments||[]).filter(i=>monthOf(i.date)===month||monthOf(i.paidDate)===month);
+    relevant.forEach((i,idx)=>contractRows.push({
+      "Hợp đồng":c.name,"Giá trị hợp đồng":Number(c.value)||0,"Đã thu toàn HĐ":paid,"Còn phải thu":remain,"% đã thanh toán":pct,
+      "Đợt":`Đợt ${(c.installments||[]).indexOf(i)+1}`,"Số tiền đợt":Number(i.amount)||0,"Ngày dự kiến":i.date||"","Đã nhận":i.paid?"Có":"Chưa","Ngày nhận":i.paidDate||"","Trạng thái HĐ":c.status||"","Ghi chú":c.note||""
+    }));
+  });
+  const wsContracts=XLSX.utils.json_to_sheet(contractRows.length?contractRows:[{"Hợp đồng":"Không có đợt hợp đồng liên quan tháng này"}]);
+  wsContracts["!cols"]=[{wch:28},{wch:18},{wch:18},{wch:18},{wch:15},{wch:12},{wch:18},{wch:14},{wch:12},{wch:14},{wch:18},{wch:28}];
+
+  const debtRows=[];
+  data.debts.forEach(d=>{
+    const pays=(d.payments||[]).filter(p=>monthOf(p.date)===month);
+    if(pays.length){pays.forEach(p=>debtRows.push({"Khoản nợ":d.name,"Nợ ban đầu":Number(d.total)||0,"Số tiền đã trả":Number(p.amount)||0,"Ngày trả":p.date||"","Nợ còn lại hiện tại":Number(d.current)||0,"Trả mỗi kỳ":Number(d.payment)||0,"Ngày đến hạn tiếp theo":d.nextDate||"","Ghi chú":d.note||""}))}
+    else if(monthOf(d.nextDate)===month){debtRows.push({"Khoản nợ":d.name,"Nợ ban đầu":Number(d.total)||0,"Số tiền đã trả":0,"Ngày trả":"","Nợ còn lại hiện tại":Number(d.current)||0,"Trả mỗi kỳ":Number(d.payment)||0,"Ngày đến hạn tiếp theo":d.nextDate||"","Ghi chú":d.note||""})}
+  });
+  const wsDebts=XLSX.utils.json_to_sheet(debtRows.length?debtRows:[{"Khoản nợ":"Không có kỳ nợ / trả góp liên quan tháng này"}]);
+  wsDebts["!cols"]=[{wch:28},{wch:18},{wch:18},{wch:14},{wch:20},{wch:16},{wch:20},{wch:28}];
+
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,wsOverview,"Tổng quan");
+  XLSX.utils.book_append_sheet(wb,wsTx,"Giao dịch");
+  XLSX.utils.book_append_sheet(wb,wsContracts,"Hợp đồng");
+  XLSX.utils.book_append_sheet(wb,wsDebts,"Nợ trả góp");
+  return wb;
+}
+async function writeMonthToFolder(month,handle){
+  if(!hasMonthData(month))return false;
+  const wb=makeMonthlyWorkbook(month),bytes=XLSX.write(wb,{bookType:"xlsx",type:"array"});
+  const fileHandle=await handle.getFileHandle(backupFileName(month),{create:true});
+  const writable=await fileHandle.createWritable();await writable.write(bytes);await writable.close();
+  backupSettings.lastSavedAt=new Date().toISOString();persistBackupSettings();return true;
+}
+function downloadMonthExcel(month){
+  const wb=makeMonthlyWorkbook(month);XLSX.writeFile(wb,backupFileName(month));
+}
+async function refreshBackupStatus(){
+  const el=$("backupFolderStatus");if(!el)return;
+  if(!("showDirectoryPicker" in window)){el.className="backup-status warn";el.textContent="Trình duyệt này không hỗ trợ ghi tự động vào folder. Hãy dùng Chrome/Edge trên Mac; bạn vẫn có thể tải Excel thủ công.";return}
+  try{backupDirHandle=backupDirHandle||await idbGetHandle()}catch(e){}
+  if(!backupDirHandle){el.className="backup-status warn";el.textContent="Chưa chọn thư mục. Hãy chọn /Users/mac/Documents/DAT/BALANCE APP một lần.";return}
+  const granted=await ensureBackupPermission(backupDirHandle,false);
+  el.className=`backup-status ${granted?"ok":"warn"}`;
+  el.textContent=granted?`Đã kết nối folder “${backupDirHandle.name}”. Excel sẽ tự cập nhật khi dữ liệu thay đổi.`:`Đã nhớ folder “${backupDirHandle.name}” nhưng cần cấp lại quyền ghi. Bấm “Chọn thư mục” hoặc “Lưu tháng đang chọn”.`;
+}
+async function chooseBackupFolder(){
+  if(!("showDirectoryPicker" in window)){toast("Hãy dùng Chrome hoặc Edge trên Mac để bật lưu tự động vào folder");return}
+  try{
+    const handle=await window.showDirectoryPicker({id:"balance-monthly-backup",mode:"readwrite",startIn:"documents"});
+    backupDirHandle=handle;await idbSetHandle(handle);backupSettings.autoEnabled=true;persistBackupSettings();$("autoBackupEnabled").checked=true;await refreshBackupStatus();
+    const month=$("dashboardMonth")?.value||today().slice(0,7);await writeMonthToFolder(month,handle);toast(`Đã kết nối “${handle.name}” và lưu ${backupFileName(month)}`);
+  }catch(e){if(e?.name!=="AbortError")toast("Không thể kết nối thư mục sao lưu")}
+}
+async function saveSelectedMonthExcel(){
+  const month=$("dashboardMonth")?.value||today().slice(0,7);
+  if(!window.XLSX){toast("Thư viện Excel chưa tải xong");return}
+  try{
+    backupDirHandle=backupDirHandle||await idbGetHandle();
+    if(backupDirHandle && await ensureBackupPermission(backupDirHandle,true)){await writeMonthToFolder(month,backupDirHandle);await refreshBackupStatus();toast(`Đã lưu ${backupFileName(month)}`);return}
+    downloadMonthExcel(month);toast(`Đã tải ${backupFileName(month)} về máy`);
+  }catch(e){console.error(e);toast("Không thể lưu Excel tháng này")}
+}
+async function saveAllMonthsExcel(){
+  if(!window.XLSX){toast("Thư viện Excel chưa tải xong");return}
+  try{
+    backupDirHandle=backupDirHandle||await idbGetHandle();
+    if(!(backupDirHandle && await ensureBackupPermission(backupDirHandle,true))){toast("Hãy chọn folder sao lưu trước để lưu tất cả tháng");return}
+    const months=allBackupMonths();for(const month of months)await writeMonthToFolder(month,backupDirHandle);
+    await refreshBackupStatus();toast(`Đã cập nhật ${months.length} file Excel theo tháng`);
+  }catch(e){console.error(e);toast("Không thể sao lưu tất cả tháng")}
+}
+function scheduleAutoExcelBackup(){
+  if(!backupSettings.autoEnabled)return;clearTimeout(backupTimer);backupTimer=setTimeout(()=>runAutoExcelBackup(),900);
+}
+async function runAutoExcelBackup(){
+  if(backupBusy){backupQueued=true;return}backupBusy=true;
+  try{
+    backupDirHandle=backupDirHandle||await idbGetHandle();if(!backupDirHandle||!(await ensureBackupPermission(backupDirHandle,false)))return;
+    const current=today().slice(0,7),previous=monthShift(current,-1);
+    if(backupSettings.lastArchivedMonth!==previous && hasMonthData(previous)){await writeMonthToFolder(previous,backupDirHandle);backupSettings.lastArchivedMonth=previous;persistBackupSettings()}
+    await writeMonthToFolder(current,backupDirHandle);
+  }catch(e){console.warn("Auto Excel backup skipped",e)}finally{backupBusy=false;if(backupQueued){backupQueued=false;scheduleAutoExcelBackup()}}
+}
+async function initExcelBackup(){
+  if($("autoBackupEnabled"))$("autoBackupEnabled").checked=backupSettings.autoEnabled;
+  await refreshBackupStatus();if(backupSettings.autoEnabled)setTimeout(()=>runAutoExcelBackup(),1200);
+}
+
 function load(){
   try{
     const v=JSON.parse(localStorage.getItem(KEY)||"null");
@@ -406,7 +711,7 @@ function normalize(v){
     debts:Array.isArray(v.debts)?v.debts.map(d=>({...d,payments:Array.isArray(d.payments)?d.payments:[]})):[]
   };
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll();scheduleAutoExcelBackup()}
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1800)}
 function openModal(id){$(id).classList.add("show")}
 function closeModal(id){$(id).classList.remove("show")}
@@ -791,8 +1096,12 @@ $("debtTable").addEventListener("click",e=>{
   if(del){askConfirm("Xóa khoản nợ này?",()=>{data.debts=data.debts.filter(d=>d.id!==del.dataset.deleteDebt);save();toast("Đã xóa khoản nợ")})}
 });
 
-$("settingsBtn").addEventListener("click",()=>{$("openingBalance").value=data.openingBalance?new Intl.NumberFormat("vi-VN").format(data.openingBalance):"";openModal("settingsModal")});
-$("saveSettingsBtn").addEventListener("click",()=>{data.openingBalance=num($("openingBalance").value);save();closeModal("settingsModal");toast("Đã lưu thiết lập")});
+$("settingsBtn").addEventListener("click",()=>{$("openingBalance").value=data.openingBalance?new Intl.NumberFormat("vi-VN").format(data.openingBalance):"";$("autoBackupEnabled").checked=backupSettings.autoEnabled;refreshBackupStatus();openModal("settingsModal")});
+$("saveSettingsBtn").addEventListener("click",()=>{data.openingBalance=num($("openingBalance").value);backupSettings.autoEnabled=$("autoBackupEnabled").checked;persistBackupSettings();save();closeModal("settingsModal");toast("Đã lưu thiết lập")});
+$("autoBackupEnabled").addEventListener("change",()=>{backupSettings.autoEnabled=$("autoBackupEnabled").checked;persistBackupSettings();if(backupSettings.autoEnabled)scheduleAutoExcelBackup()});
+$("chooseBackupFolderBtn").addEventListener("click",chooseBackupFolder);
+$("backupSelectedMonthBtn").addEventListener("click",saveSelectedMonthExcel);
+$("backupAllMonthsBtn").addEventListener("click",saveAllMonthsExcel);
 $("exportJsonBtn").addEventListener("click",()=>{
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`balance-backup-${today()}.json`;a.click();URL.revokeObjectURL(a.href);
 });
@@ -811,6 +1120,7 @@ $("exportCsvBtn").addEventListener("click",()=>{
 });
 
 renderAll();
+initExcelBackup();
 })();
 </script>
 </body>
