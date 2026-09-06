@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Balance — Quản lý dòng tiền</title>
+<style>
+:root{
+  --bg:#f5f5f7;--card:rgba(255,255,255,.88);--solid:#fff;--text:#1d1d1f;--muted:#6e6e73;
+  --line:rgba(0,0,0,.08);--blue:#0071e3;--blue2:#2997ff;--green:#128a50;--red:#d92d20;
+  --orange:#b85c00;--purple:#6e5ae6;--shadow:0 1px 2px rgba(0,0,0,.02),0 8px 30px rgba(0,0,0,.04);
+  --r:22px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--text);background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",sans-serif;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(0,113,227,.24);outline-offset:2px}
+.app{max-width:1440px;margin:auto;padding:24px 28px 64px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#111;color:#fff;font-weight:800;font-size:20px;letter-spacing:-1px}
+.brand h1{font-size:21px;line-height:1;margin:0;letter-spacing:-.4px}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.nav{display:flex;gap:4px;padding:4px;background:rgba(118,118,128,.12);border-radius:12px}
+.nav button{border:0;background:transparent;padding:8px 13px;border-radius:9px;color:var(--muted);font-weight:600;font-size:13px}
+.nav button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{height:40px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--text);padding:0 14px;font-weight:650}
+.btn.primary{background:var(--blue);color:white;border-color:var(--blue)}.btn.primary:hover{background:#0077ed}
+.btn.soft{background:rgba(0,113,227,.08);color:var(--blue);border-color:transparent}
+.btn.danger{color:var(--red);background:rgba(217,45,32,.06);border-color:transparent}
+.iconbtn{width:38px;padding:0;display:grid;place-items:center}
+.page{display:none}.page.active{display:block}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:8px 0 18px}
+.hero h2{font-size:34px;line-height:1.08;letter-spacing:-1.2px;margin:0 0 7px}.hero p{margin:0;color:var(--muted)}
+.month-select{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;height:42px}
+.month-select input{border:0;background:transparent;color:var(--text);outline:0}
+.kpis{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid rgba(0,0,0,.055);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.kpi{padding:22px;min-height:142px;display:flex;flex-direction:column;justify-content:space-between}
+.kpi.primary{background:#111;color:#fff;border-color:#111}.kpi.primary .eyebrow,.kpi.primary .meta{color:rgba(255,255,255,.63)}
+.eyebrow{font-size:12px;color:var(--muted);font-weight:650}.kpi .value{font-size:30px;font-weight:750;letter-spacing:-1.1px;margin:8px 0}.kpi .meta{font-size:12px;color:var(--muted)}
+.value.green{color:var(--green)}.value.red{color:var(--red)}.value.blue{color:var(--blue)}
+.four-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.summary-card{padding:18px;min-height:138px}
+.summary-card .top{display:flex;justify-content:space-between;align-items:center;gap:8px}.dot{width:9px;height:9px;border-radius:50%}
+.summary-card .money{font-size:22px;font-weight:730;letter-spacing:-.55px;margin:15px 0 3px}.summary-card .sub{font-size:12px;color:var(--muted)}
+.dashboard-grid{display:grid;grid-template-columns:1.35fr .85fr;gap:12px}
+.panel{padding:20px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.panel-head h3{font-size:17px;margin:0;letter-spacing:-.25px}.panel-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:12px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.03em;color:var(--muted);font-weight:700;background:rgba(250,250,250,.9);text-transform:uppercase}
+td{font-size:13px}tbody tr:last-child td{border-bottom:0}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.green{background:rgba(18,138,80,.09);color:var(--green)}.badge.orange{background:rgba(184,92,0,.09);color:var(--orange)}
+.badge.blue{background:rgba(0,113,227,.08);color:var(--blue)}.badge.gray{background:rgba(118,118,128,.1);color:var(--muted)}
+.badge.red{background:rgba(217,45,32,.08);color:var(--red)}
+.progress{height:7px;border-radius:999px;background:#e8e8ed;overflow:hidden;min-width:82px}.progress span{display:block;height:100%;background:var(--blue);border-radius:inherit}
+.progress-wrap{display:flex;align-items:center;gap:8px}.progress-wrap b{min-width:38px;font-size:12px}
+.timeline{display:grid;gap:6px}
+.event{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.event:last-child{border-bottom:0}.event .date{font-size:11px;color:var(--muted);font-weight:700}.event .name{font-weight:650;font-size:13px}.event .desc{font-size:11px;color:var(--muted);margin-top:2px}.event .amount{font-weight:700;font-size:13px;white-space:nowrap}
+.section-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 14px}
+.section-tools .left h2{font-size:28px;letter-spacing:-.7px;margin:0}.section-tools .left p{margin:5px 0 0;color:var(--muted)}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap}
+.search{height:40px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:0 12px;min-width:240px;color:var(--text)}
+.list-card{padding:0;overflow:hidden}
+.empty{padding:42px 18px;text-align:center;color:var(--muted);font-size:13px}
+.contract-name{font-weight:700}.small{font-size:11px;color:var(--muted);margin-top:2px}
+.money-positive{color:var(--green);font-weight:700}.money-negative{color:var(--red);font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.28);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal-backdrop.show{display:flex}.modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:rgba(255,255,255,.98);border-radius:24px;padding:22px;box-shadow:0 30px 90px rgba(0,0,0,.2)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.modal-head h3{font-size:20px;letter-spacing:-.35px;margin:0}
+.close{border:0;width:34px;height:34px;border-radius:50%;background:#f2f2f7;font-size:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field.full{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:700;margin:0 0 6px;color:#3a3a3c}
+.field input,.field select,.field textarea{width:100%;border:1px solid rgba(0,0,0,.1);background:#fff;border-radius:12px;padding:11px 12px;color:var(--text);min-height:42px}
+.field textarea{min-height:82px;resize:vertical}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.installments{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.installment-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:8px}
+.installment-row button{height:42px}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f2f2f7;padding:4px;border-radius:11px}
+.segment label{margin:0}.segment input{display:none}.segment span{display:block;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}.segment input:checked+span{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.toast{position:fixed;right:22px;bottom:22px;background:#1d1d1f;color:#fff;border-radius:13px;padding:11px 14px;font-size:13px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:none}
+.inline-actions{display:flex;gap:6px}.mini-btn{border:0;background:#f2f2f7;border-radius:8px;padding:7px 9px;font-size:11px;font-weight:700;color:var(--text)}.mini-btn.blue{color:var(--blue);background:rgba(0,113,227,.08)}.mini-btn.red{color:var(--red);background:rgba(217,45,32,.06)}
+.setting-line{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}.setting-line:last-child{border-bottom:0}.setting-line strong{display:block}.setting-line span{font-size:12px;color:var(--muted)}
+.cash-input{max-width:180px;text-align:right}
+.analytics-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.range-switch{display:flex;gap:4px;padding:4px;background:rgba(118,118,128,.12);border-radius:11px}
+.range-switch button{height:32px;border:0;background:transparent;color:var(--muted);padding:0 11px;border-radius:8px;font-size:12px;font-weight:700}
+.range-switch button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.analytics-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px}
+.analytics-kpi{padding:20px;min-height:128px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.analytics-kpi::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0 3px 3px 0;background:#d1d1d6}
+.analytics-kpi:has(#analyticsActiveIncome)::before{background:#2f9e5b}
+.analytics-kpi:has(#analyticsPassiveIncome)::before{background:#35c9a5}
+.analytics-kpi:has(#analyticsActiveExpense)::before{background:#e84a7f}
+.analytics-kpi:has(#analyticsPassiveExpense)::before{background:#f28b30}
+.analytics-kpi:has(#analyticsNet)::before{background:#1677e8}
+.analytics-kpi .big{font-size:28px;font-weight:760;letter-spacing:-.9px;margin:9px 0 2px}
+.analytics-kpi .delta{font-size:12px;color:var(--muted)}
+/* Analytics palette: 4 money streams + monthly net */
+.analytics-active-income{color:#2f9e5b!important}
+.analytics-passive-income{color:#35c9a5!important}
+.analytics-active-expense{color:#e84a7f!important}
+.analytics-passive-expense{color:#f28b30!important}
+.analytics-net-positive{color:#1677e8!important}
+.analytics-net-negative{color:#e53935!important}
+.analytics-net-neutral{color:var(--muted)!important}
+.net-positive{color:var(--green)!important}.net-negative{color:var(--red)!important}.net-neutral{color:var(--muted)!important}
+.analytics-chart-card{padding:22px;margin-bottom:12px}
+.chart-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:22px}
+.chart-head h3{font-size:18px;margin:0;letter-spacing:-.3px}.chart-head p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.chart-legend{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}.legend-item{display:flex;gap:6px;align-items:center}.legend-dot{width:9px;height:9px;border-radius:3px}
+.month-chart{display:grid;grid-template-columns:repeat(var(--chart-cols,12),minmax(54px,1fr));gap:8px;align-items:end;min-height:285px;padding:8px 2px 0;overflow-x:auto}
+.chart-month{border:0;background:transparent;min-width:54px;padding:0 2px;display:flex;flex-direction:column;align-items:stretch;gap:8px;color:var(--muted);border-radius:12px;transition:.16s}
+.chart-month:hover,.chart-month.selected{background:rgba(0,113,227,.055)}
+.chart-bars{height:220px;display:flex;gap:5px;align-items:flex-end;justify-content:center;padding:8px 6px 0;border-bottom:1px solid var(--line)}
+.chart-bar{width:min(22px,42%);min-height:0;border-radius:7px 7px 3px 3px;transition:height .25s ease;position:relative}
+.chart-bar{display:flex;flex-direction:column-reverse;overflow:hidden;background:#ececf1}
+.chart-segment{display:block;width:100%;min-height:0;transition:height .25s ease}
+.chart-segment.active-income{background:#2f9e5b}.chart-segment.passive-income{background:#35c9a5}.chart-segment.active-expense{background:#e84a7f}.chart-segment.passive-expense{background:#f28b30}
+.chart-month.selected .chart-bar{box-shadow:0 0 0 2px rgba(0,113,227,.14)}
+.chart-label{text-align:center;font-size:11px;font-weight:700;white-space:nowrap}.chart-year{text-align:center;font-size:10px;color:#9a9aa0;min-height:14px}
+.range-summary{display:flex;gap:10px 18px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--line);margin-top:16px;font-size:12px;color:var(--muted)}.range-summary b{color:var(--text);font-weight:750}
+.month-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.month-detail{padding:17px;border:1px solid var(--line);background:rgba(255,255,255,.72);border-radius:18px;text-align:left;color:var(--text);transition:.16s}
+.month-detail:hover,.month-detail.selected{border-color:rgba(0,113,227,.28);background:#fff}.month-detail.selected{box-shadow:0 0 0 3px rgba(0,113,227,.07)}
+.month-detail-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:13px}.month-detail-head strong{font-size:15px}.month-net{font-size:16px;font-weight:760;white-space:nowrap}
+.month-detail-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:12px;color:var(--muted)}.month-detail-row b{font-weight:720}.month-detail-row .in{color:var(--green)}.month-detail-row .out{color:var(--red)}
+.selected-month-card{padding:20px;margin-top:12px}.selected-month-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.selected-month-head h3{font-size:17px;margin:0}.selected-month-head p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.active-tx-list{display:grid;gap:0}.active-tx-row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}.active-tx-row:last-child{border-bottom:0}.active-tx-row .when{font-size:11px;color:var(--muted)}.active-tx-row .what{font-size:13px;font-weight:650}.active-tx-row .kind{font-size:11px;color:var(--muted);margin-top:2px}.active-tx-row .amt{font-size:13px;font-weight:750;white-space:nowrap}
+@media(max-width:1050px){.kpis{grid-template-columns:1fr 1fr}.four-grid{grid-template-columns:1fr 1fr}.dashboard-grid{grid-template-columns:1fr}.analytics-kpis{grid-template-columns:repeat(2,1fr)}.topbar{flex-wrap:wrap}.nav{order:3;width:100%;overflow:auto}.nav button{flex:1;white-space:nowrap}}
+@media(max-width:650px){.app{padding:18px 14px 48px}.topbar{margin-bottom:18px}.brand p{display:none}.actions .btn:not(.primary){display:none}.hero{align-items:flex-start;flex-direction:column}.hero h2{font-size:29px}.kpis,.four-grid,.analytics-kpis{grid-template-columns:1fr}.kpi{min-height:120px}.section-tools{align-items:flex-start;flex-direction:column}.toolrow{width:100%}.search{min-width:0;flex:1}.form-grid{grid-template-columns:1fr}.installment-row{grid-template-columns:1fr 1fr}.installment-row .wide{grid-column:1/-1}.modal{padding:18px;border-radius:20px}.event{grid-template-columns:42px 1fr}.event .amount{grid-column:2}.month-detail-grid{grid-template-columns:1fr}.analytics-chart-card{padding:17px}.chart-head{align-items:flex-start;flex-direction:column}.month-chart{grid-template-columns:repeat(var(--chart-cols,12),64px);margin-right:-4px}.active-tx-row{grid-template-columns:70px 1fr}.active-tx-row .amt{grid-column:2}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">B</div>
+      <div><h1>Balance</h1><p>Dòng tiền cá nhân & hợp đồng</p></div>
+    </div>
+    <nav class="nav" aria-label="Điều hướng">
+      <button class="active" data-page="dashboard">Tổng quan</button>
+      <button data-page="analytics">Phân tích</button>
+      <button data-page="transactions">Giao dịch</button>
+      <button data-page="contracts">Hợp đồng</button>
+      <button data-page="debts">Nợ & trả góp</button>
+    </nav>
+    <div class="actions">
+      <button class="btn" id="settingsBtn">Thiết lập</button>
+      <button class="btn primary" id="quickAddBtn">+ Giao dịch</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="page-dashboard">
+      <div class="hero">
+        <div><h2>Tổng quan tài chính</h2><p>Tiền thực tế, khoản đang chờ và nghĩa vụ còn lại.</p></div>
+        <div class="month-select">Tháng <input type="month" id="dashboardMonth"></div>
+      </div>
+
+      <div class="kpis">
+        <article class="card kpi primary">
+          <div class="eyebrow">SỐ TIỀN THỰC TẾ ĐANG CÓ</div>
+          <div class="value" id="cashNow">0 ₫</div>
+          <div class="meta" id="cashMeta">Số dư gốc + các khoản đã thực nhận / chi</div>
+        </article>
+        <article class="card kpi">
+          <div class="eyebrow">THỤ ĐỘNG CHƯA THU</div>
+          <div class="value green" id="passivePending">0 ₫</div>
+          <div class="meta" id="passivePendingMeta">Từ các hợp đồng chưa thanh toán hết</div>
+        </article>
+        <article class="card kpi">
+          <div class="eyebrow">NỢ CÒN LẠI</div>
+          <div class="value red" id="debtRemaining">0 ₫</div>
+          <div class="meta" id="debtMeta">Tổng nghĩa vụ chưa thanh toán</div>
+        </article>
+        <article class="card kpi">
+          <div class="eyebrow">SẮP PHẢI TRẢ • 30 NGÀY</div>
+          <div class="value" id="dueSoon">0 ₫</div>
+          <div class="meta" id="dueSoonMeta">Các kỳ trả góp sắp tới</div>
+        </article>
+      </div>
+
+      <div class="four-grid">
+        <article class="card summary-card"><div class="top"><span class="eyebrow">THU NHẬP CHỦ ĐỘNG</span><i class="dot" style="background:#2f9e5b"></i></div><div class="money" id="activeIncome">0 ₫</div><div class="sub">Lương cứng & khoản chủ động đã nhận trong tháng</div></article>
+        <article class="card summary-card"><div class="top"><span class="eyebrow">THU NHẬP THỤ ĐỘNG</span><i class="dot" style="background:#35c9a5"></i></div><div class="money" id="passiveIncome">0 ₫</div><div class="sub">Tiền hợp đồng đã thực nhận trong tháng</div></article>
+        <article class="card summary-card"><div class="top"><span class="eyebrow">CHI TIÊU CHỦ ĐỘNG</span><i class="dot" style="background:#e84a7f"></i></div><div class="money" id="activeExpense">0 ₫</div><div class="sub">Ăn uống, mua sắm, đi lại, giải trí…</div></article>
+        <article class="card summary-card"><div class="top"><span class="eyebrow">CHI TIÊU THỤ ĐỘNG</span><i class="dot" style="background:#f28b30"></i></div><div class="money" id="passiveExpense">0 ₫</div><div class="sub">Trả góp, tiền nhà, subscription, khoản bắt buộc</div></article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="card panel">
+          <div class="panel-head"><div><h3>Hợp đồng đang theo dõi</h3><p>Tiến độ thanh toán và số tiền còn phải thu.</p></div><button class="btn soft" id="dashAddContract">+ Hợp đồng</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Hợp đồng</th><th>Giá trị</th><th>Đã thu</th><th>Còn lại</th><th>Thanh toán</th><th>Trạng thái</th></tr></thead><tbody id="dashboardContracts"></tbody></table></div>
+        </article>
+        <article class="card panel">
+          <div class="panel-head"><div><h3>Sắp tới</h3><p>Các đợt thu và kỳ phải trả gần nhất.</p></div></div>
+          <div class="timeline" id="upcomingTimeline"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-analytics">
+      <div class="hero">
+        <div><h2>Biến động thu chi</h2><p>Phân tích đủ thu/chi chủ động và thụ động để biết từng tháng đang dương hay âm.</p></div>
+        <div class="analytics-controls">
+          <div class="range-switch" aria-label="Khoảng thời gian">
+            <button type="button" data-analytics-range="6">6 tháng</button>
+            <button type="button" class="active" data-analytics-range="12">12 tháng</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-kpis">
+        <article class="card analytics-kpi"><div class="eyebrow">THU CHỦ ĐỘNG • <span id="analyticsActiveIncomeMonthLabel">THÁNG NÀY</span></div><div class="big analytics-active-income" id="analyticsActiveIncome">0 ₫</div><div class="delta" id="analyticsActiveIncomeDelta">So với tháng trước: —</div></article>
+        <article class="card analytics-kpi"><div class="eyebrow">THU THỤ ĐỘNG • <span id="analyticsPassiveIncomeMonthLabel">THÁNG NÀY</span></div><div class="big analytics-passive-income" id="analyticsPassiveIncome">0 ₫</div><div class="delta" id="analyticsPassiveIncomeDelta">Tiền hợp đồng đã thực nhận</div></article>
+        <article class="card analytics-kpi"><div class="eyebrow">CHI CHỦ ĐỘNG • <span id="analyticsActiveExpenseMonthLabel">THÁNG NÀY</span></div><div class="big analytics-active-expense" id="analyticsActiveExpense">0 ₫</div><div class="delta" id="analyticsActiveExpenseDelta">So với tháng trước: —</div></article>
+        <article class="card analytics-kpi"><div class="eyebrow">CHI THỤ ĐỘNG • <span id="analyticsPassiveExpenseMonthLabel">THÁNG NÀY</span></div><div class="big analytics-passive-expense" id="analyticsPassiveExpense">0 ₫</div><div class="delta" id="analyticsPassiveExpenseDelta">Trả góp & khoản chi thụ động</div></article>
+        <article class="card analytics-kpi"><div class="eyebrow">RÒNG THÁNG • <span id="analyticsNetMonthLabel">THÁNG NÀY</span></div><div class="big" id="analyticsNet">0 ₫</div><div class="delta" id="analyticsNetHint">Tổng thu − Tổng chi</div></article>
+      </div>
+
+      <article class="card analytics-chart-card">
+        <div class="chart-head">
+          <div><h3>Biểu đồ Thu / Chi</h3><p id="analyticsRangeLabel">12 tháng gần nhất</p></div>
+          <div class="chart-legend">
+            <span class="legend-item"><i class="legend-dot" style="background:#2f9e5b"></i>Thu chủ động</span>
+            <span class="legend-item"><i class="legend-dot" style="background:#35c9a5"></i>Thu thụ động</span>
+            <span class="legend-item"><i class="legend-dot" style="background:#e84a7f"></i>Chi chủ động</span>
+            <span class="legend-item"><i class="legend-dot" style="background:#f28b30"></i>Chi thụ động</span>
+          </div>
+        </div>
+        <div class="month-chart" id="monthlyChart"></div>
+        <div class="range-summary" id="analyticsRangeSummary"></div>
+      </article>
+
+      <div class="dashboard-grid">
+        <article class="card panel">
+          <div class="panel-head"><div><h3>Chi tiết theo tháng</h3><p>Mỗi tháng tính đủ 4 nhóm thu/chi và số ròng thực tế.</p></div></div>
+          <div class="month-detail-grid" id="monthDetailGrid"></div>
+        </article>
+        <article class="card selected-month-card">
+          <div class="selected-month-head"><div><h3 id="selectedMonthTitle">Giao dịch trong tháng</h3><p>Bao gồm cả chủ động và thụ động.</p></div></div>
+          <div class="active-tx-list" id="selectedMonthTransactions"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-transactions">
+      <div class="section-tools">
+        <div class="left"><h2>Giao dịch</h2><p>Chỉ các khoản đã thực sự vào hoặc ra khỏi tiền của bạn.</p></div>
+        <div class="toolrow"><input class="search" id="txSearch" placeholder="Tìm giao dịch…"><button class="btn" id="exportCsvBtn">Xuất CSV</button><button class="btn primary" id="addTxBtn">+ Giao dịch</button></div>
+      </div>
+      <article class="card list-card">
+        <div class="table-wrap" style="border:0;border-radius:22px"><table><thead><tr><th>Ngày</th><th>Nhóm</th><th>Nội dung</th><th>Nguồn</th><th>Số tiền</th><th></th></tr></thead><tbody id="txTable"></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="page" id="page-contracts">
+      <div class="section-tools">
+        <div class="left"><h2>Hợp đồng</h2><p>Thu nhập thụ động — theo dõi từng đợt thanh toán và % giá trị đã nhận.</p></div>
+        <div class="toolrow"><input class="search" id="contractSearch" placeholder="Tìm hợp đồng…"><button class="btn primary" id="addContractBtn">+ Hợp đồng</button></div>
+      </div>
+      <article class="card list-card">
+        <div class="table-wrap" style="border:0;border-radius:22px"><table><thead><tr><th>Hợp đồng</th><th>Giá trị</th><th>Đã thanh toán</th><th>Còn phải thu</th><th>Tiến độ</th><th>Đợt tiếp theo</th><th>Trạng thái</th><th></th></tr></thead><tbody id="contractTable"></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="page" id="page-debts">
+      <div class="section-tools">
+        <div class="left"><h2>Nợ & trả góp</h2><p>Quản lý số dư nợ và các kỳ thanh toán định kỳ.</p></div>
+        <div class="toolrow"><input class="search" id="debtSearch" placeholder="Tìm khoản nợ…"><button class="btn primary" id="addDebtBtn">+ Khoản nợ</button></div>
+      </div>
+      <article class="card list-card">
+        <div class="table-wrap" style="border:0;border-radius:22px"><table><thead><tr><th>Khoản nợ</th><th>Nợ ban đầu</th><th>Còn lại</th><th>Trả mỗi kỳ</th><th>Ngày trả</th><th>Tiến độ</th><th></th></tr></thead><tbody id="debtTable"></tbody></table></div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="txModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="txModalTitle">Thêm giao dịch</h3><button class="close" data-close="txModal">×</button></div>
+    <form id="txForm">
+      <div class="form-grid">
+        <div class="field full"><label>Nhóm giao dịch</label>
+          <select id="txType">
+            <option value="active_income">Thu nhập chủ động</option>
+            <option value="passive_income">Thu nhập thụ động</option>
+            <option value="active_expense">Chi tiêu chủ động</option>
+            <option value="passive_expense">Chi tiêu thụ động</option>
+          </select>
+        </div>
+        <div class="field"><label>Số tiền</label><input id="txAmount" inputmode="numeric" placeholder="10.000.000" required></div>
+        <div class="field"><label>Ngày</label><input id="txDate" type="date" required></div>
+        <div class="field full"><label>Nội dung</label><input id="txNote" placeholder="Lương tháng 9, tiền ăn, tiền nhà…" required></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn" data-close="txModal">Hủy</button><button class="btn primary" id="txSubmitBtn">Lưu giao dịch</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="contractModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="contractModalTitle">Hợp đồng mới</h3><button class="close" data-close="contractModal">×</button></div>
+    <form id="contractForm">
+      <div class="form-grid">
+        <div class="field full"><label>Tên hợp đồng / dự án</label><input id="contractName" required placeholder="Ví dụ: FPT Event 2026"></div>
+        <div class="field"><label>Tổng giá trị hợp đồng</label><input id="contractValue" inputmode="numeric" required placeholder="30.000.000"></div>
+        <div class="field"><label>Trạng thái</label><select id="contractStatus"><option>Đang thực hiện</option><option>Chờ nghiệm thu</option><option>Chờ thanh toán</option><option>Hoàn tất</option></select></div>
+        <div class="field full"><label>Ghi chú</label><input id="contractNote" placeholder="Khách hàng, mã hợp đồng, ghi chú…"></div>
+      </div>
+      <div class="installments">
+        <div class="panel-head" style="margin:0"><div><h3 style="font-size:15px">Các đợt thanh toán</h3><p>Có thể nhập theo % hoặc số tiền thực tế.</p></div><button type="button" class="btn soft" id="addInstallmentRow">+ Thêm đợt</button></div>
+        <div id="installmentRows"></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn" data-close="contractModal">Hủy</button><button class="btn primary" id="contractSubmitBtn">Tạo hợp đồng</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="contractDetailModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="detailContractTitle">Chi tiết hợp đồng</h3><button class="close" data-close="contractDetailModal">×</button></div>
+    <div id="contractDetailBody"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="debtModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="debtModalTitle">Khoản nợ / trả góp mới</h3><button class="close" data-close="debtModal">×</button></div>
+    <form id="debtForm">
+      <div class="form-grid">
+        <div class="field full"><label>Tên khoản nợ</label><input id="debtName" required placeholder="MacBook, khoản vay A…"></div>
+        <div class="field"><label>Tổng nợ ban đầu</label><input id="debtTotal" inputmode="numeric" required placeholder="30.000.000"></div>
+        <div class="field"><label>Số dư nợ hiện tại</label><input id="debtCurrent" inputmode="numeric" required placeholder="30.000.000"></div>
+        <div class="field"><label>Số tiền trả mỗi kỳ</label><input id="debtPayment" inputmode="numeric" required placeholder="3.000.000"></div>
+        <div class="field"><label>Ngày đến hạn tiếp theo</label><input id="debtNextDate" type="date" required></div>
+        <div class="field"><label>Chu kỳ</label><select id="debtFrequency"><option value="monthly">Hàng tháng</option><option value="weekly">Hàng tuần</option></select></div>
+        <div class="field full"><label>Ghi chú</label><input id="debtNote" placeholder="Ngân hàng, thiết bị, người cho vay…"></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn" data-close="debtModal">Hủy</button><button class="btn primary" id="debtSubmitBtn">Lưu khoản nợ</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Thiết lập</h3><button class="close" data-close="settingsModal">×</button></div>
+    <div class="setting-line"><div><strong>Số dư tiền thực tế ban đầu</strong><span>Làm mốc để tính tiền đang có.</span></div><input id="openingBalance" class="cash-input" inputmode="numeric"></div>
+    <div class="setting-line"><div><strong>Sao lưu dữ liệu</strong><span>Tải toàn bộ dữ liệu thành file JSON.</span></div><button class="btn" id="exportJsonBtn">Xuất JSON</button></div>
+    <div class="setting-line"><div><strong>Nhập dữ liệu</strong><span>Khôi phục từ file JSON đã sao lưu.</span></div><input type="file" id="importJsonInput" accept=".json" style="max-width:230px"></div>
+    <div class="setting-line"><div><strong>Xóa toàn bộ dữ liệu</strong><span>Không thể hoàn tác nếu chưa sao lưu.</span></div><button class="btn danger" id="resetDataBtn">Xóa dữ liệu</button></div>
+    <div class="form-actions"><button class="btn primary" id="saveSettingsBtn">Lưu thiết lập</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal" style="width:min(420px,100%)">
+    <div class="modal-head"><h3>Xác nhận</h3><button class="close" data-close="confirmModal">×</button></div>
+    <p id="confirmMessage" style="margin:0;color:var(--muted);line-height:1.6"></p>
+    <div class="form-actions"><button type="button" class="btn" data-close="confirmModal">Hủy</button><button type="button" class="btn danger" id="confirmOkBtn">Xác nhận</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+const KEY="balance-v2-data";
+if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})}
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
+const money=n=>new Intl.NumberFormat("vi-VN",{style:"currency",currency:"VND",maximumFractionDigits:0}).format(Number(n)||0);
+const num=v=>Number(String(v??"").replace(/[^\d]/g,""))||0;
+const fmtDate=s=>{if(!s)return"—";const [y,m,d]=s.split("-");return `${d}/${m}/${y}`};
+const monthOf=s=>String(s||"").slice(0,7);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+let data=load();
+let currentContractId=null;
+let editingTxId=null;
+let editingContractId=null;
+let editingDebtId=null;
+let analyticsRange=12;
+let analyticsSelectedMonth=today().slice(0,7);
+
+function load(){
+  try{
+    const v=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(v && typeof v==="object") return normalize(v);
+  }catch(e){}
+  return {openingBalance:0,transactions:[],contracts:[],debts:[]};
+}
+function normalize(v){
+  return {
+    openingBalance:Number(v.openingBalance)||0,
+    transactions:Array.isArray(v.transactions)?v.transactions:[],
+    contracts:Array.isArray(v.contracts)?v.contracts:[],
+    debts:Array.isArray(v.debts)?v.debts.map(d=>({...d,payments:Array.isArray(d.payments)?d.payments:[]})):[]
+  };
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1800)}
+function openModal(id){$(id).classList.add("show")}
+function closeModal(id){$(id).classList.remove("show")}
+let confirmAction=null;
+function askConfirm(message,action){$("confirmMessage").textContent=message;confirmAction=action;openModal("confirmModal")}
+$("confirmOkBtn").addEventListener("click",()=>{const fn=confirmAction;confirmAction=null;closeModal("confirmModal");if(typeof fn==="function")fn()});
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+document.querySelectorAll(".modal-backdrop").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+
+function bindMoneyInput(el){
+  el.addEventListener("input",()=>{const n=num(el.value);el.value=n?new Intl.NumberFormat("vi-VN").format(n):""});
+}
+["txAmount","contractValue","debtTotal","debtCurrent","debtPayment","openingBalance"].forEach(id=>bindMoneyInput($(id)));
+
+document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  $("page-"+btn.dataset.page).classList.add("active");
+}));
+
+const nowMonth=today().slice(0,7);
+$("dashboardMonth").value=nowMonth;
+$("txDate").value=today();
+$("debtNextDate").value=today();
+
+function cashNow(){
+  return data.openingBalance + data.transactions.reduce((s,t)=>{
+    if(t.type==="active_income"||t.type==="passive_income")return s+t.amount;
+    return s-t.amount;
+  },0);
+}
+function contractPaid(c){return (c.installments||[]).filter(i=>i.paid).reduce((s,i)=>s+i.amount,0)}
+function contractPending(c){return Math.max(0,c.value-contractPaid(c))}
+function debtRemainingTotal(){return data.debts.reduce((s,d)=>s+Math.max(0,d.current),0)}
+function datePlusDays(s,days){const [y,m,d]=s.split("-").map(Number);const dt=new Date(y,m-1,d);dt.setDate(dt.getDate()+days);return [dt.getFullYear(),String(dt.getMonth()+1).padStart(2,"0"),String(dt.getDate()).padStart(2,"0")].join("-")}
+function dueSoonTotal(){
+  const end=datePlusDays(today(),30);
+  return data.debts.filter(d=>d.current>0&&d.nextDate>=today()&&d.nextDate<=end).reduce((s,d)=>s+Math.min(d.payment,d.current),0);
+}
+function typeLabel(t){return {active_income:"Thu nhập chủ động",passive_income:"Thu nhập thụ động",active_expense:"Chi tiêu chủ động",passive_expense:"Chi tiêu thụ động"}[t]||t}
+function typeClass(t){return t.includes("income")?"money-positive":"money-negative"}
+function analyticsTypeClass(t){return {active_income:"analytics-active-income",passive_income:"analytics-passive-income",active_expense:"analytics-active-expense",passive_expense:"analytics-passive-expense"}[t]||""}
+function statusBadge(s){
+  const cls=s==="Hoàn tất"?"green":s==="Chờ thanh toán"?"blue":s==="Chờ nghiệm thu"?"orange":"gray";
+  return `<span class="badge ${cls}">${esc(s)}</span>`;
+}
+function nextInstallment(c){
+  return (c.installments||[]).filter(i=>!i.paid).sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"))[0]||null;
+}
+
+function renderDashboard(){
+  const month=$("dashboardMonth").value||nowMonth;
+  $("cashNow").textContent=money(cashNow());
+  const pending=data.contracts.reduce((s,c)=>s+contractPending(c),0);
+  $("passivePending").textContent=money(pending);
+  $("passivePendingMeta").textContent=`${data.contracts.filter(c=>contractPending(c)>0).length} hợp đồng chưa thu đủ`;
+  $("debtRemaining").textContent=money(debtRemainingTotal());
+  $("debtMeta").textContent=`${data.debts.filter(d=>d.current>0).length} khoản nợ đang theo dõi`;
+  $("dueSoon").textContent=money(dueSoonTotal());
+
+  const tx=data.transactions.filter(t=>monthOf(t.date)===month);
+  const sum=t=>tx.filter(x=>x.type===t).reduce((s,x)=>s+x.amount,0);
+  $("activeIncome").textContent=money(sum("active_income"));
+  $("passiveIncome").textContent=money(sum("passive_income"));
+  $("activeExpense").textContent=money(sum("active_expense"));
+  $("passiveExpense").textContent=money(sum("passive_expense"));
+
+  const contracts=data.contracts.filter(c=>contractPending(c)>0).slice().sort((a,b)=>contractPending(b)-contractPending(a)).slice(0,6);
+  $("dashboardContracts").innerHTML=contracts.length?contracts.map(c=>{
+    const paid=contractPaid(c),pct=c.value?Math.min(100,Math.round(paid/c.value*100)):0;
+    return `<tr><td><div class="contract-name">${esc(c.name)}</div><div class="small">${esc(c.note||"")}</div></td>
+      <td>${money(c.value)}</td><td class="money-positive">${money(paid)}</td><td>${money(contractPending(c))}</td>
+      <td><div class="progress-wrap"><div class="progress"><span style="width:${pct}%"></span></div><b>${pct}%</b></div></td>
+      <td>${statusBadge(c.status)}</td></tr>`;
+  }).join(""):`<tr><td colspan="6"><div class="empty">Chưa có hợp đồng đang chờ thanh toán.</div></td></tr>`;
+
+  let events=[];
+  data.contracts.forEach(c=>(c.installments||[]).filter(i=>!i.paid&&i.date).forEach(i=>events.push({date:i.date,name:c.name,desc:`Đợt thu ${money(i.amount)}`,amount:i.amount,kind:"in"})));
+  data.debts.filter(d=>d.current>0&&d.nextDate).forEach(d=>events.push({date:d.nextDate,name:d.name,desc:"Kỳ trả tiếp theo",amount:Math.min(d.payment,d.current),kind:"out"}));
+  events=events.filter(e=>e.date>=today()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,7);
+  $("upcomingTimeline").innerHTML=events.length?events.map(e=>`<div class="event"><div class="date">${fmtDate(e.date).slice(0,5)}</div><div><div class="name">${esc(e.name)}</div><div class="desc">${esc(e.desc)}</div></div><div class="amount ${e.kind==="in"?"money-positive":"money-negative"}">${e.kind==="in"?"+":"−"}${money(e.amount)}</div></div>`).join(""):`<div class="empty">Chưa có khoản sắp tới.</div>`;
+}
+
+
+function addMonths(month,delta){
+  const [y,m]=month.split("-").map(Number),d=new Date(y,m-1+delta,1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+function monthLabel(month,long=false){
+  const [y,m]=month.split("-").map(Number);
+  return long?`Tháng ${String(m).padStart(2,"0")}/${y}`:`T${m}`;
+}
+function monthStats(month){
+  const tx=data.transactions.filter(t=>monthOf(t.date)===month);
+  const activeIncome=tx.filter(t=>t.type==="active_income").reduce((s,t)=>s+(Number(t.amount)||0),0);
+  const passiveIncome=tx.filter(t=>t.type==="passive_income").reduce((s,t)=>s+(Number(t.amount)||0),0);
+  const activeExpense=tx.filter(t=>t.type==="active_expense").reduce((s,t)=>s+(Number(t.amount)||0),0);
+  const passiveExpense=tx.filter(t=>t.type==="passive_expense").reduce((s,t)=>s+(Number(t.amount)||0),0);
+  const income=activeIncome+passiveIncome;
+  const expense=activeExpense+passiveExpense;
+  return {month,activeIncome,passiveIncome,activeExpense,passiveExpense,income,expense,net:income-expense};
+}
+function pctChange(current,previous){
+  if(previous===0){return current===0?null:100}
+  return ((current-previous)/Math.abs(previous))*100;
+}
+function deltaText(current,previous){
+  const p=pctChange(current,previous);
+  if(p===null)return "So với tháng trước: —";
+  const sign=p>0?"+":"";
+  return `So với tháng trước: ${sign}${Math.round(p)}%`;
+}
+function netClass(n){return n>0?"analytics-net-positive":n<0?"analytics-net-negative":"analytics-net-neutral"}
+function renderAnalytics(){
+  const months=[];
+  for(let i=analyticsRange-1;i>=0;i--)months.push(addMonths(nowMonth,-i));
+  if(!months.includes(analyticsSelectedMonth))analyticsSelectedMonth=months[months.length-1];
+  const stats=months.map(monthStats);
+  const selected=monthStats(analyticsSelectedMonth),prev=monthStats(addMonths(analyticsSelectedMonth,-1));
+  const selectedLabel=monthLabel(analyticsSelectedMonth,true).toUpperCase();
+
+  ["analyticsActiveIncomeMonthLabel","analyticsPassiveIncomeMonthLabel","analyticsActiveExpenseMonthLabel","analyticsPassiveExpenseMonthLabel","analyticsNetMonthLabel"].forEach(id=>$(id).textContent=selectedLabel);
+  $("analyticsActiveIncome").textContent=money(selected.activeIncome);
+  $("analyticsPassiveIncome").textContent=money(selected.passiveIncome);
+  $("analyticsActiveExpense").textContent=money(selected.activeExpense);
+  $("analyticsPassiveExpense").textContent=money(selected.passiveExpense);
+  $("analyticsActiveIncomeDelta").textContent=deltaText(selected.activeIncome,prev.activeIncome);
+  $("analyticsPassiveIncomeDelta").textContent=deltaText(selected.passiveIncome,prev.passiveIncome);
+  $("analyticsActiveExpenseDelta").textContent=deltaText(selected.activeExpense,prev.activeExpense);
+  $("analyticsPassiveExpenseDelta").textContent=deltaText(selected.passiveExpense,prev.passiveExpense);
+
+  const netEl=$("analyticsNet");
+  netEl.textContent=`${selected.net>0?"+":selected.net<0?"−":""}${money(Math.abs(selected.net))}`;
+  netEl.className=`big ${netClass(selected.net)}`;
+  $("analyticsNetHint").textContent=selected.net>0?`Dương ${money(selected.net)} sau toàn bộ chi tiêu`:selected.net<0?`Âm ${money(Math.abs(selected.net))} sau toàn bộ thu/chi`:"Tổng thu và tổng chi đang cân bằng";
+
+  const max=Math.max(1,...stats.flatMap(s=>[s.income,s.expense]));
+  $("monthlyChart").style.setProperty("--chart-cols",analyticsRange);
+  $("monthlyChart").innerHTML=stats.map((s,idx)=>{
+    const incomeH=s.income>0?Math.max(4,Math.round(s.income/max*100)):0;
+    const expenseH=s.expense>0?Math.max(4,Math.round(s.expense/max*100)):0;
+    const aiPct=s.income?Math.round(s.activeIncome/s.income*100):0;
+    const piPct=s.income?100-aiPct:0;
+    const aePct=s.expense?Math.round(s.activeExpense/s.expense*100):0;
+    const pePct=s.expense?100-aePct:0;
+    const yearChange=idx===0||s.month.slice(0,4)!==stats[idx-1].month.slice(0,4);
+    return `<button type="button" class="chart-month ${s.month===analyticsSelectedMonth?"selected":""}" data-chart-month="${s.month}" title="${monthLabel(s.month,true)} • Tổng thu ${money(s.income)} • Tổng chi ${money(s.expense)} • ${s.net>=0?"Dương":"Âm"} ${money(Math.abs(s.net))}">
+      <span class="chart-bars">
+        <i class="chart-bar income" style="height:${incomeH}%"><span class="chart-segment active-income" style="height:${aiPct}%"></span><span class="chart-segment passive-income" style="height:${piPct}%"></span></i>
+        <i class="chart-bar expense" style="height:${expenseH}%"><span class="chart-segment active-expense" style="height:${aePct}%"></span><span class="chart-segment passive-expense" style="height:${pePct}%"></span></i>
+      </span>
+      <span class="chart-label">${monthLabel(s.month)}</span><span class="chart-year">${yearChange?s.month.slice(0,4):""}</span></button>`;
+  }).join("");
+
+  const totalActiveIn=stats.reduce((s,x)=>s+x.activeIncome,0),totalPassiveIn=stats.reduce((s,x)=>s+x.passiveIncome,0);
+  const totalActiveOut=stats.reduce((s,x)=>s+x.activeExpense,0),totalPassiveOut=stats.reduce((s,x)=>s+x.passiveExpense,0);
+  const totalIn=totalActiveIn+totalPassiveIn,totalOut=totalActiveOut+totalPassiveOut,totalNet=totalIn-totalOut;
+  $("analyticsRangeLabel").textContent=`${analyticsRange} tháng gần nhất • ${monthLabel(months[0],true)} → ${monthLabel(months[months.length-1],true)}`;
+  $("analyticsRangeSummary").innerHTML=`<span>Tổng thu <b>${money(totalIn)}</b></span><span>Tổng chi <b>${money(totalOut)}</b></span><span>Thu chủ động <b class="analytics-active-income">${money(totalActiveIn)}</b></span><span>Thu thụ động <b class="analytics-passive-income">${money(totalPassiveIn)}</b></span><span>Chi chủ động <b class="analytics-active-expense">${money(totalActiveOut)}</b></span><span>Chi thụ động <b class="analytics-passive-expense">${money(totalPassiveOut)}</b></span><span>Ròng <b class="${netClass(totalNet)}">${totalNet>0?"+":totalNet<0?"−":""}${money(Math.abs(totalNet))}</b></span>`;
+
+  $("monthDetailGrid").innerHTML=stats.slice().reverse().map(s=>`<button type="button" class="month-detail ${s.month===analyticsSelectedMonth?"selected":""}" data-detail-month="${s.month}">
+    <div class="month-detail-head"><strong>${monthLabel(s.month,true)}</strong><span class="month-net ${netClass(s.net)}">${s.net>0?"+":s.net<0?"−":""}${money(Math.abs(s.net))}</span></div>
+    <div class="month-detail-row"><span>Thu chủ động</span><b class="analytics-active-income">${money(s.activeIncome)}</b></div>
+    <div class="month-detail-row"><span>Thu thụ động</span><b class="analytics-passive-income">${money(s.passiveIncome)}</b></div>
+    <div class="month-detail-row"><span>Chi chủ động</span><b class="analytics-active-expense">${money(s.activeExpense)}</b></div>
+    <div class="month-detail-row"><span>Chi thụ động</span><b class="analytics-passive-expense">${money(s.passiveExpense)}</b></div>
+    <div class="month-detail-row" style="border-top:1px solid var(--line);margin-top:5px;padding-top:9px"><span>Tổng thu / chi</span><b>${money(s.income)} / ${money(s.expense)}</b></div>
+  </button>`).join("");
+
+  $("selectedMonthTitle").textContent=`Giao dịch • ${monthLabel(analyticsSelectedMonth,true)}`;
+  const monthTx=data.transactions.filter(t=>monthOf(t.date)===analyticsSelectedMonth&&["active_income","passive_income","active_expense","passive_expense"].includes(t.type)).sort((a,b)=>b.date.localeCompare(a.date));
+  $("selectedMonthTransactions").innerHTML=monthTx.length?monthTx.map(t=>`<div class="active-tx-row"><div class="when">${fmtDate(t.date)}</div><div><div class="what">${esc(t.note)}</div><div class="kind">${typeLabel(t.type)}</div></div><div class="amt ${analyticsTypeClass(t.type)}">${t.type.includes("income")?"+":"−"}${money(t.amount)}</div></div>`).join(""):`<div class="empty">Tháng này chưa có giao dịch.</div>`;
+}
+
+function renderTransactions(){
+  const q=$("txSearch").value.trim().toLowerCase();
+  const tx=data.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).filter(t=>!q||`${t.note} ${typeLabel(t.type)} ${t.source||""}`.toLowerCase().includes(q));
+  $("txTable").innerHTML=tx.length?tx.map(t=>`<tr><td>${fmtDate(t.date)}</td><td><span class="badge ${t.type.includes("income")?"green":"gray"}">${typeLabel(t.type)}</span></td><td>${esc(t.note)}</td><td>${esc(t.source||"Thủ công")}</td><td class="${typeClass(t.type)}">${t.type.includes("income")?"+":"−"}${money(t.amount)}</td><td><div class="inline-actions"><button type="button" class="mini-btn blue" data-edit-tx="${t.id}">Sửa</button><button type="button" class="mini-btn red" data-delete-tx="${t.id}">Xóa</button></div></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty">Chưa có giao dịch.</div></td></tr>`;
+}
+
+function renderContracts(){
+  const q=$("contractSearch").value.trim().toLowerCase();
+  const arr=data.contracts.filter(c=>!q||`${c.name} ${c.note||""}`.toLowerCase().includes(q)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  $("contractTable").innerHTML=arr.length?arr.map(c=>{
+    const paid=contractPaid(c),pending=contractPending(c),pct=c.value?Math.min(100,Math.round(paid/c.value*100)):0,nxt=nextInstallment(c);
+    return `<tr><td><div class="contract-name">${esc(c.name)}</div><div class="small">${esc(c.note||"")}</div></td><td>${money(c.value)}</td><td class="money-positive">${money(paid)}</td><td>${money(pending)}</td>
+      <td><div class="progress-wrap"><div class="progress"><span style="width:${pct}%"></span></div><b>${pct}%</b></div></td>
+      <td>${nxt?`${fmtDate(nxt.date)}<div class="small">${money(nxt.amount)}</div>`:"—"}</td><td>${statusBadge(c.status)}</td>
+      <td><div class="inline-actions"><button type="button" class="mini-btn blue" data-open-contract="${c.id}">Chi tiết</button><button type="button" class="mini-btn" data-edit-contract="${c.id}">Sửa</button><button type="button" class="mini-btn red" data-delete-contract="${c.id}">Xóa</button></div></td></tr>`;
+  }).join(""):`<tr><td colspan="8"><div class="empty">Chưa có hợp đồng. Tạo hợp đồng đầu tiên để theo dõi khoản phải thu.</div></td></tr>`;
+
+}
+function deleteContract(id){
+  const c=data.contracts.find(x=>x.id===id);if(!c)return;
+  const paidTx=(c.installments||[]).filter(i=>i.transactionId).map(i=>i.transactionId);
+  askConfirm("Xóa hợp đồng này? Các giao dịch đã nhận từ hợp đồng cũng sẽ bị xóa để số dư không sai.",()=>{data.transactions=data.transactions.filter(t=>!paidTx.includes(t.id));data.contracts=data.contracts.filter(c=>c.id!==id);save();toast("Đã xóa hợp đồng")});
+}
+function openContractDetail(id){
+  const c=data.contracts.find(x=>x.id===id);if(!c)return;currentContractId=id;
+  $("detailContractTitle").textContent=c.name;
+  const paid=contractPaid(c),pct=c.value?Math.min(100,Math.round(paid/c.value*100)):0;
+  $("contractDetailBody").innerHTML=`
+    <div class="kpis" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:16px">
+      <div class="card kpi" style="min-height:110px"><div class="eyebrow">GIÁ TRỊ HỢP ĐỒNG</div><div class="value" style="font-size:22px">${money(c.value)}</div></div>
+      <div class="card kpi" style="min-height:110px"><div class="eyebrow">ĐÃ NHẬN</div><div class="value green" style="font-size:22px">${money(paid)}</div></div>
+      <div class="card kpi" style="min-height:110px"><div class="eyebrow">CÒN PHẢI THU</div><div class="value" style="font-size:22px">${money(contractPending(c))}</div></div>
+    </div>
+    <div style="margin:4px 0 18px"><div class="progress-wrap"><div class="progress" style="height:10px;flex:1"><span style="width:${pct}%"></span></div><b>${pct}%</b></div></div>
+    <div class="panel-head"><div><h3 style="font-size:15px">Các đợt thanh toán</h3><p>Khi bấm “Đã nhận”, tiền sẽ tự cộng vào số tiền thực tế.</p></div></div>
+    <div class="table-wrap"><table style="min-width:560px"><thead><tr><th>Đợt</th><th>Số tiền</th><th>Ngày dự kiến</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+    ${(c.installments||[]).map((i,idx)=>`<tr><td>Đợt ${idx+1}</td><td>${money(i.amount)}</td><td>${fmtDate(i.date)}</td><td>${i.paid?'<span class="badge green">Đã nhận</span>':'<span class="badge orange">Chưa nhận</span>'}</td><td>${i.paid?`<button type="button" class="mini-btn red" data-unpay="${i.id}">Hoàn tác</button>`:`<button type="button" class="mini-btn blue" data-pay="${i.id}">Đã nhận tiền</button>`}</td></tr>`).join("")||'<tr><td colspan="5"><div class="empty">Chưa có đợt thanh toán.</div></td></tr>'}
+    </tbody></table></div>
+    <div class="form-actions"><button type="button" class="btn" id="editContractFromDetail">Sửa hợp đồng</button><select id="detailStatus" class="btn" style="height:40px">${["Đang thực hiện","Chờ nghiệm thu","Chờ thanh toán","Hoàn tất"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select><button class="btn primary" id="saveContractStatus">Lưu trạng thái</button></div>`;
+  document.querySelectorAll("[data-pay]").forEach(b=>b.addEventListener("click",()=>payInstallment(c.id,b.dataset.pay)));
+  document.querySelectorAll("[data-unpay]").forEach(b=>b.addEventListener("click",()=>unpayInstallment(c.id,b.dataset.unpay)));
+  $("saveContractStatus").addEventListener("click",()=>{c.status=$("detailStatus").value;save();openContractDetail(c.id);toast("Đã cập nhật trạng thái")});
+  $("editContractFromDetail").addEventListener("click",()=>{closeModal("contractDetailModal");showContract(c.id)});
+  openModal("contractDetailModal");
+}
+function payInstallment(cid,iid){
+  const c=data.contracts.find(x=>x.id===cid),i=(c.installments||[]).find(x=>x.id===iid);if(!i||i.paid)return;
+  const txid=uid();i.paid=true;i.paidDate=today();i.transactionId=txid;
+  data.transactions.push({id:txid,type:"passive_income",amount:i.amount,date:today(),note:`${c.name} — thanh toán hợp đồng`,source:"Hợp đồng"});
+  if(contractPending(c)===0)c.status="Hoàn tất";else if(c.status==="Đang thực hiện")c.status="Chờ thanh toán";
+  save();openContractDetail(cid);toast("Đã nhận tiền và cộng vào số dư");
+}
+function unpayInstallment(cid,iid){
+  const c=data.contracts.find(x=>x.id===cid),i=(c.installments||[]).find(x=>x.id===iid);if(!i||!i.paid)return;
+  askConfirm("Hoàn tác đợt đã nhận? Giao dịch tiền vào tương ứng sẽ bị xóa.",()=>{if(i.transactionId)data.transactions=data.transactions.filter(t=>t.id!==i.transactionId);i.paid=false;i.paidDate=null;i.transactionId=null;if(c.status==="Hoàn tất")c.status="Chờ thanh toán";save();openContractDetail(cid);toast("Đã hoàn tác")});
+}
+
+function renderDebts(){
+  const q=$("debtSearch").value.trim().toLowerCase();
+  const arr=data.debts.filter(d=>!q||`${d.name} ${d.note||""}`.toLowerCase().includes(q)).sort((a,b)=>a.nextDate.localeCompare(b.nextDate));
+  $("debtTable").innerHTML=arr.length?arr.map(d=>{
+    const paid=Math.max(0,d.total-d.current),pct=d.total?Math.min(100,Math.round(paid/d.total*100)):0;
+    return `<tr><td><div class="contract-name">${esc(d.name)}</div><div class="small">${esc(d.note||"")}</div></td><td>${money(d.total)}</td><td class="money-negative">${money(d.current)}</td><td>${money(d.payment)}</td><td>${fmtDate(d.nextDate)}</td>
+    <td><div class="progress-wrap"><div class="progress"><span style="width:${pct}%"></span></div><b>${pct}%</b></div></td>
+    <td><div class="inline-actions">${d.current>0?`<button type="button" class="mini-btn blue" data-pay-debt="${d.id}">Đã trả kỳ này</button>`:"<span class='badge green'>Hoàn tất</span>"}<button type="button" class="mini-btn" data-edit-debt="${d.id}">Sửa</button><button type="button" class="mini-btn red" data-delete-debt="${d.id}">Xóa</button></div></td></tr>`;
+  }).join(""):`<tr><td colspan="7"><div class="empty">Chưa có khoản nợ hoặc trả góp.</div></td></tr>`;
+}
+function nextDebtDate(date,freq){
+  const [y,m,d]=date.split("-").map(Number),dt=new Date(y,m-1,d);
+  if(freq==="weekly")dt.setDate(dt.getDate()+7);else dt.setMonth(dt.getMonth()+1);
+  return [dt.getFullYear(),String(dt.getMonth()+1).padStart(2,"0"),String(dt.getDate()).padStart(2,"0")].join("-");
+}
+function payDebt(id){
+  const d=data.debts.find(x=>x.id===id);
+  if(!d){toast("Không tìm thấy khoản nợ");return}
+  if(d.current<=0){toast("Khoản nợ này đã hoàn tất");return}
+  const amount=Math.min(Number(d.payment)||0,Number(d.current)||0);
+  if(amount<=0){toast("Số tiền trả mỗi kỳ chưa hợp lệ. Hãy bấm Sửa để cập nhật.");return}
+  const txid=uid(),paymentId=uid(),paidDate=today();
+  d.current=Math.max(0,d.current-amount);
+  if(!Array.isArray(d.payments))d.payments=[];
+  d.payments.push({id:paymentId,amount,date:paidDate,transactionId:txid});
+  data.transactions.push({id:txid,type:"passive_expense",amount,date:paidDate,note:`${d.name} — kỳ trả góp`,source:"Nợ / trả góp",relatedDebtId:d.id,paymentId});
+  d.nextDate=nextDebtDate(d.nextDate||paidDate,d.frequency||"monthly");
+  save();toast(`Đã trả ${money(amount)} • Còn ${money(d.current)}`);
+}
+
+function renderAll(){renderDashboard();renderAnalytics();renderTransactions();renderContracts();renderDebts()}
+
+$("dashboardMonth").addEventListener("change",renderDashboard);
+document.querySelectorAll("[data-analytics-range]").forEach(b=>b.addEventListener("click",()=>{analyticsRange=Number(b.dataset.analyticsRange)||12;document.querySelectorAll("[data-analytics-range]").forEach(x=>x.classList.toggle("active",x===b));renderAnalytics()}));
+$("monthlyChart").addEventListener("click",e=>{const b=e.target.closest("[data-chart-month]");if(!b)return;analyticsSelectedMonth=b.dataset.chartMonth;renderAnalytics()});
+$("monthDetailGrid").addEventListener("click",e=>{const b=e.target.closest("[data-detail-month]");if(!b)return;analyticsSelectedMonth=b.dataset.detailMonth;renderAnalytics();$("monthlyChart").scrollIntoView({behavior:"smooth",block:"center"})});
+$("txSearch").addEventListener("input",renderTransactions);
+$("contractSearch").addEventListener("input",renderContracts);
+$("debtSearch").addEventListener("input",renderDebts);
+
+function showTx(id=null){
+  editingTxId=id;
+  const form=$("txForm");form.reset();$("txDate").value=today();
+  const t=id?data.transactions.find(x=>x.id===id):null;
+  $("txModalTitle").textContent=t?"Chỉnh sửa giao dịch":"Thêm giao dịch";
+  $("txSubmitBtn").textContent=t?"Lưu thay đổi":"Lưu giao dịch";
+  if(t){$("txType").value=t.type;$("txAmount").value=new Intl.NumberFormat("vi-VN").format(t.amount);$("txDate").value=t.date;$("txNote").value=t.note||""}
+  openModal("txModal");
+}
+$("quickAddBtn").addEventListener("click",()=>showTx());$("addTxBtn").addEventListener("click",()=>showTx());
+
+$("txForm").addEventListener("submit",e=>{
+  e.preventDefault();const amount=num($("txAmount").value),date=$("txDate").value,note=$("txNote").value.trim(),type=$("txType").value;
+  if(!amount||!date||!note){toast("Vui lòng nhập đủ thông tin");return}
+  if(editingTxId){
+    const t=data.transactions.find(x=>x.id===editingTxId);if(!t){toast("Không tìm thấy giao dịch");return}
+    t.type=type;t.amount=amount;t.date=date;t.note=note;
+    // Nếu đây là giao dịch từ hợp đồng, đồng bộ lại số tiền của đợt thanh toán tương ứng.
+    data.contracts.forEach(c=>(c.installments||[]).forEach(i=>{if(i.transactionId===t.id){i.amount=amount;i.paidDate=date}}));
+    toast("Đã cập nhật giao dịch");
+  }else{
+    data.transactions.push({id:uid(),type,amount,date,note,source:"Thủ công"});
+    toast("Đã lưu giao dịch");
+  }
+  editingTxId=null;e.target.reset();$("txDate").value=today();save();closeModal("txModal");
+});
+
+function addInstallmentRow(defaults={}){
+  const row=document.createElement("div");row.className="installment-row";
+  row.dataset.installmentId=defaults.id||"";row.dataset.paid=defaults.paid?"1":"0";row.dataset.paidDate=defaults.paidDate||"";row.dataset.transactionId=defaults.transactionId||"";
+  row.innerHTML=`<div class="field"><label>Số tiền ${defaults.paid?'<span class="badge green" style="margin-left:5px">Đã nhận</span>':''}</label><input class="inst-amount" inputmode="numeric" placeholder="10.000.000" value="${defaults.amount?new Intl.NumberFormat("vi-VN").format(defaults.amount):""}"></div>
+  <div class="field"><label>Hoặc % hợp đồng</label><input class="inst-percent" inputmode="decimal" placeholder="30" value="${defaults.percent||""}"></div>
+  <div class="field wide"><label>Ngày dự kiến</label><input class="inst-date" type="date" value="${defaults.date||today()}"></div>
+  <button type="button" class="btn danger remove-inst" title="Xóa đợt">×</button>`;
+  $("installmentRows").appendChild(row);
+  bindMoneyInput(row.querySelector(".inst-amount"));
+  row.querySelector(".remove-inst").addEventListener("click",()=>row.remove());
+  row.querySelector(".inst-percent").addEventListener("input",e=>{e.target.value=e.target.value.replace(/[^\d.]/g,"").slice(0,6)});
+}
+$("addInstallmentRow").addEventListener("click",()=>addInstallmentRow());
+function showContract(id=null){
+  editingContractId=id;$("contractForm").reset();$("installmentRows").innerHTML="";
+  const c=id?data.contracts.find(x=>x.id===id):null;
+  $("contractModalTitle").textContent=c?"Chỉnh sửa hợp đồng":"Hợp đồng mới";$("contractSubmitBtn").textContent=c?"Lưu thay đổi":"Tạo hợp đồng";
+  if(c){
+    $("contractName").value=c.name;$("contractValue").value=new Intl.NumberFormat("vi-VN").format(c.value);$("contractStatus").value=c.status;$("contractNote").value=c.note||"";
+    (c.installments||[]).forEach(i=>addInstallmentRow(i));if(!(c.installments||[]).length)addInstallmentRow();
+  }else addInstallmentRow();
+  openModal("contractModal");
+}
+$("addContractBtn").addEventListener("click",()=>showContract());$("dashAddContract").addEventListener("click",()=>showContract());
+$("contractForm").addEventListener("submit",e=>{
+  e.preventDefault();const value=num($("contractValue").value),name=$("contractName").value.trim();
+  if(!name||!value){toast("Vui lòng nhập tên và giá trị hợp đồng");return}
+  const old=editingContractId?data.contracts.find(x=>x.id===editingContractId):null;
+  const oldMap=new Map((old?.installments||[]).map(i=>[i.id,i]));
+  const installments=[...document.querySelectorAll(".installment-row")].map(r=>{
+    const amountRaw=num(r.querySelector(".inst-amount").value),pct=parseFloat(r.querySelector(".inst-percent").value)||0,amount=amountRaw||Math.round(value*pct/100);
+    if(amount<=0)return null;
+    const oldInst=oldMap.get(r.dataset.installmentId);
+    return {id:oldInst?.id||uid(),amount,percent:pct,date:r.querySelector(".inst-date").value||today(),paid:oldInst?.paid||false,paidDate:oldInst?.paidDate||null,transactionId:oldInst?.transactionId||null};
+  }).filter(Boolean);
+  const sum=installments.reduce((s,i)=>s+i.amount,0),paidSum=installments.filter(i=>i.paid).reduce((s,i)=>s+i.amount,0);
+  if(sum>value*1.005){toast("Tổng các đợt đang lớn hơn giá trị hợp đồng");return}
+  if(paidSum>value){toast("Giá trị hợp đồng không thể nhỏ hơn số tiền đã nhận");return}
+  if(old){
+    const kept=new Set(installments.map(i=>i.id));
+    (old.installments||[]).filter(i=>i.paid&&!kept.has(i.id)&&i.transactionId).forEach(i=>{data.transactions=data.transactions.filter(t=>t.id!==i.transactionId)});
+    installments.filter(i=>i.paid&&i.transactionId).forEach(i=>{const t=data.transactions.find(t=>t.id===i.transactionId);if(t){t.amount=i.amount;t.note=`${name} — thanh toán hợp đồng`}});
+    Object.assign(old,{name,value,status:$("contractStatus").value,note:$("contractNote").value.trim(),installments});
+    toast("Đã cập nhật hợp đồng");
+  }else{
+    data.contracts.push({id:uid(),name,value,status:$("contractStatus").value,note:$("contractNote").value.trim(),installments,createdAt:today()});toast("Đã tạo hợp đồng");
+  }
+  editingContractId=null;save();closeModal("contractModal");
+});
+
+function showDebt(id=null){
+  editingDebtId=id;$("debtForm").reset();$("debtNextDate").value=today();
+  const d=id?data.debts.find(x=>x.id===id):null;
+  $("debtModalTitle").textContent=d?"Chỉnh sửa khoản nợ / trả góp":"Khoản nợ / trả góp mới";$("debtSubmitBtn").textContent=d?"Lưu thay đổi":"Lưu khoản nợ";
+  if(d){$("debtName").value=d.name;$("debtTotal").value=new Intl.NumberFormat("vi-VN").format(d.total);$("debtCurrent").value=new Intl.NumberFormat("vi-VN").format(d.current);$("debtPayment").value=new Intl.NumberFormat("vi-VN").format(d.payment);$("debtNextDate").value=d.nextDate;$("debtFrequency").value=d.frequency||"monthly";$("debtNote").value=d.note||""}
+  openModal("debtModal");
+}
+$("addDebtBtn").addEventListener("click",()=>showDebt());
+$("debtForm").addEventListener("submit",e=>{
+  e.preventDefault();const name=$("debtName").value.trim(),total=num($("debtTotal").value),current=num($("debtCurrent").value),payment=num($("debtPayment").value),nextDate=$("debtNextDate").value;
+  if(!name||!total||!payment||!nextDate){toast("Vui lòng nhập đủ thông tin");return}
+  if(current>total){toast("Số dư nợ hiện tại không thể lớn hơn nợ ban đầu");return}
+  if(editingDebtId){const d=data.debts.find(x=>x.id===editingDebtId);if(!d){toast("Không tìm thấy khoản nợ");return}Object.assign(d,{name,total,current,payment,nextDate,frequency:$("debtFrequency").value,note:$("debtNote").value.trim()});toast("Đã cập nhật khoản nợ")}
+  else{data.debts.push({id:uid(),name,total,current:Math.min(current,total),payment,nextDate,frequency:$("debtFrequency").value,note:$("debtNote").value.trim(),payments:[]});toast("Đã thêm khoản nợ")}
+  editingDebtId=null;save();closeModal("debtModal");
+});
+
+// Event delegation: giữ các nút Sửa / Xóa / Đã trả luôn hoạt động sau mỗi lần render lại bảng.
+$("txTable").addEventListener("click",e=>{
+  const edit=e.target.closest("[data-edit-tx]"),del=e.target.closest("[data-delete-tx]");
+  if(edit){showTx(edit.dataset.editTx);return}
+  if(del){askConfirm("Xóa giao dịch này?",()=>{data.transactions=data.transactions.filter(t=>t.id!==del.dataset.deleteTx);save();toast("Đã xóa giao dịch")})}
+});
+$("contractTable").addEventListener("click",e=>{
+  const open=e.target.closest("[data-open-contract]"),edit=e.target.closest("[data-edit-contract]"),del=e.target.closest("[data-delete-contract]");
+  if(open){openContractDetail(open.dataset.openContract);return}
+  if(edit){showContract(edit.dataset.editContract);return}
+  if(del){deleteContract(del.dataset.deleteContract)}
+});
+$("debtTable").addEventListener("click",e=>{
+  const pay=e.target.closest("[data-pay-debt]"),edit=e.target.closest("[data-edit-debt]"),del=e.target.closest("[data-delete-debt]");
+  if(pay){payDebt(pay.dataset.payDebt);return}
+  if(edit){showDebt(edit.dataset.editDebt);return}
+  if(del){askConfirm("Xóa khoản nợ này?",()=>{data.debts=data.debts.filter(d=>d.id!==del.dataset.deleteDebt);save();toast("Đã xóa khoản nợ")})}
+});
+
+$("settingsBtn").addEventListener("click",()=>{$("openingBalance").value=data.openingBalance?new Intl.NumberFormat("vi-VN").format(data.openingBalance):"";openModal("settingsModal")});
+$("saveSettingsBtn").addEventListener("click",()=>{data.openingBalance=num($("openingBalance").value);save();closeModal("settingsModal");toast("Đã lưu thiết lập")});
+$("exportJsonBtn").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`balance-backup-${today()}.json`;a.click();URL.revokeObjectURL(a.href);
+});
+$("importJsonInput").addEventListener("change",async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const parsed=JSON.parse(await f.text());data=normalize(parsed);save();closeModal("settingsModal");toast("Đã khôi phục dữ liệu")}catch(err){toast("File JSON không hợp lệ")}
+  e.target.value="";
+});
+$("resetDataBtn").addEventListener("click",()=>{askConfirm("Xóa toàn bộ dữ liệu của app? Hành động này không thể hoàn tác nếu bạn chưa sao lưu.",()=>{data={openingBalance:0,transactions:[],contracts:[],debts:[]};save();closeModal("settingsModal");toast("Đã xóa toàn bộ dữ liệu")})});
+
+$("exportCsvBtn").addEventListener("click",()=>{
+  if(!data.transactions.length){toast("Chưa có giao dịch để xuất");return}
+  const rows=[["Ngày","Nhóm","Nội dung","Nguồn","Số tiền"],...data.transactions.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,typeLabel(t.type),t.note,t.source||"",t.type.includes("income")?t.amount:-t.amount])];
+  const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download=`balance-giao-dich-${today()}.csv`;a.click();URL.revokeObjectURL(a.href);
+});
+
+renderAll();
+})();
+</script>
+</body>
+</html>
